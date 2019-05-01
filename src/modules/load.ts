@@ -1,9 +1,6 @@
-import fs from "fs";
-import { promisify as _p } from "util";
 import { GameObject } from "@classes/game_object";
 import classes from "@classes/";
-
-const readFile = _p(fs.readFile);
+import { DB } from "@modules/database";
 
 export const objects: GameObject[] = [];
 
@@ -46,6 +43,13 @@ async function fixRefs(rootObj: GameObject) {
         const id = getRefID(prop);
         if (id !== null) {
             rootObj.props[propKey] = objects[id];
+        } else if (propKey === "exits") {
+            for (const exit of Object.keys(prop)) {
+                const exitID = getRefID(prop[exit]);
+                if (exitID !== null) {
+                    rootObj.props.exits[exit] = objects[exitID];
+                }
+            }
         }
     }
     for (const child of rootObj.children) {
@@ -53,25 +57,27 @@ async function fixRefs(rootObj: GameObject) {
     }
 }
 
-export async function load(): Promise<{
-    world: GameObject;
-    accounts: IAccount[];
-}> {
+export async function load(): Promise<Option<GameObject>> {
     try {
-        const db = await readFile("./.db/world.json", { encoding: "utf8" });
-        const accounts = await readFile("./.db/accounts.json", {
-            encoding: "utf8",
-        });
-        const dobj = JSON.parse(db);
-        const aobj = JSON.parse(accounts);
-        const rootObject = await revive(dobj);
+        const worldCol = await DB.collection("world");
+        const world = await (await worldCol.byExample({ id: 0 })).all();
+        if (world[0] === undefined) {
+            return null;
+        }
+        const rootObject = await revive(world[0]);
         await fixRefs(rootObject);
-        return {
-            world: rootObject,
-            accounts: aobj,
-        };
+        return rootObject;
     } catch (e) {
         console.log("Error loading DB:", e.message);
         throw e;
+    }
+}
+
+export async function save(rootObj: IObjectAny): Promise<void> {
+    const worldCol = await DB.collection("world");
+    if (await worldCol.documentExists(rootObj._key)) {
+        await worldCol.replace(rootObj._key, rootObj);
+    } else {
+        await worldCol.save(rootObj);
     }
 }

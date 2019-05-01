@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@types/node": "^11.13.7",
+    "arangojs": "^6.10.0",
     "argon2": "^0.21.0",
     "module-alias": "^2.2.0",
     "natural": "^0.6.3",

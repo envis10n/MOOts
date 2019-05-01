@@ -1,28 +1,21 @@
 import argon from "argon2";
 import { v4 } from "uuid";
+import { DB } from "@modules/database";
 
 function usernameRegex(): RegExp {
     return /[^\w-._]/g;
-}
-
-export const accounts: Map<string, IAccount> = new Map();
-
-export function saveAccounts(): IAccount[] {
-    return Array.from(accounts).map((v) => v[1]);
-}
-
-export function loadAccounts(data: IAccount[]) {
-    for (const account of data) {
-        accounts.set(account.username, account);
-    }
 }
 
 export async function createAccount(
     username: string,
     password: string,
 ): Promise<IAccount> {
+    const accountCol = await DB.collection("accounts");
     username = username.trim();
-    if (accounts.get(username) === undefined) {
+    const doc: IAccount[] = await (await accountCol.byExample({
+        username,
+    })).all();
+    if (doc.length === 0) {
         if (usernameRegex().test(username)) {
             throw new Error(
                 "Invalid characters.\n" +
@@ -30,6 +23,7 @@ export async function createAccount(
             );
         } else {
             const account: IAccount = {
+                _key: username,
                 username,
                 hash: await argon.hash(password, { raw: false }),
                 created: Date.now(),
@@ -41,7 +35,7 @@ export async function createAccount(
                 is_moderator: false,
                 is_wizard: false,
             };
-            accounts.set(username, account);
+            await accountCol.save(account);
             return account;
         }
     } else {
@@ -50,17 +44,21 @@ export async function createAccount(
 }
 
 export async function updateAccount(account: IAccount): Promise<void> {
-    accounts.set(account.username, account);
+    const col = await DB.collection("accounts");
+    await col.replace(account, account);
 }
 
 export async function getAccount(
     username: string,
     password: string,
 ): Promise<IAccount> {
+    const col = await DB.collection("accounts");
     username = username.trim();
     password = password.trim();
-    const account = accounts.get(username);
-    if (account !== undefined) {
+    const account: IAccount = (await (await col.byExample({
+        username,
+    })).all())[0];
+    if (account !== undefined && account !== null) {
         if (await argon.verify(account.hash, password)) {
             return account;
         } else {

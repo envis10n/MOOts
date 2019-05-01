@@ -10,6 +10,7 @@ declare interface IObject extends IObjectAny {
 }
 
 declare interface IAccount {
+    _key: string;
     uuid: string;
     username: string;
     hash: string;

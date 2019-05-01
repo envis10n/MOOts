@@ -170,6 +170,7 @@ export class GameObject implements GameObjectBase {
         const location =
             this.location === null ? null : this.location.toString();
         return {
+            _key: `Object-${this.name}-${this.id}`,
             id: this.id,
             class: this.class,
             children,

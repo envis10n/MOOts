@@ -18,11 +18,12 @@ export class Socket extends EventEmitter {
             }
             this.onData(d);
         });
-        this.socket.on("close", () => {
+        this.socket.on("close", async () => {
             if (this.controller !== null) {
                 this.controller.controlled.controller = null;
                 if (this.account !== null) {
                     this.account.online = false;
+                    await Account.updateAccount(this.account);
                 }
             }
         });
@@ -53,6 +54,7 @@ export class Socket extends EventEmitter {
                 this.account = account;
                 this.account.online = true;
                 this.account.last_login = Date.now();
+                await Account.updateAccount(this.account);
                 this.send("Authenticated.\nWelcome, " + username + ".");
                 this.selectCharacter();
             } catch (e) {
