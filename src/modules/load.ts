@@ -1,6 +1,7 @@
 import { GameObject } from "@classes/game_object";
 import classes from "@classes/";
 import { DB } from "@modules/database";
+import { recurseObject } from "@lib/object_utils";
 
 export const objects: GameObject[] = [];
 
@@ -38,20 +39,18 @@ async function fixRefs(rootObj: GameObject) {
     if (location !== null) {
         rootObj.location = objects[location];
     }
-    for (const propKey of Object.keys(rootObj.props)) {
-        const prop = rootObj.props[propKey];
-        const id = getRefID(prop);
-        if (id !== null) {
-            rootObj.props[propKey] = objects[id];
-        } else if (propKey === "exits") {
-            for (const exit of Object.keys(prop)) {
-                const exitID = getRefID(prop[exit]);
-                if (exitID !== null) {
-                    rootObj.props.exits[exit] = objects[exitID];
-                }
+    await recurseObject(rootObj.props, async (prop, key) => {
+        if (typeof prop === "string") {
+            const id = getRefID(prop);
+            if (id !== null) {
+                return objects[id];
+            } else {
+                return prop;
             }
+        } else {
+            return prop;
         }
-    }
+    });
     for (const child of rootObj.children) {
         await fixRefs(child);
     }

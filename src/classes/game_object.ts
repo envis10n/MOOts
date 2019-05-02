@@ -57,7 +57,9 @@ export class GameObject implements GameObjectBase {
         if (exit !== null) {
             this.sendMessage(`You move ${exit}.`);
             this.sendMessage(`${this.name} enters.`, this, this.location);
-            this.sendMessage(this.location.props.description);
+            room.verbs.look(this).then((msg: string) => {
+                this.sendMessage(msg);
+            });
         }
     }
     public async findObject(terms: string): Promise<Option<GameObject>> {

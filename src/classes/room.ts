@@ -1,6 +1,11 @@
 import { Inspectable } from "./inspectable";
 import { GameObject } from "./game_object";
 
+interface IExit {
+    to: GameObject;
+    door: Option<GameObject>;
+}
+
 const directions: IObjectAny = {
     north: ["north", "n"],
     south: ["south", "s"],
@@ -27,6 +32,19 @@ export function Room(
         props.exits = {};
     }
     const obj = Inspectable(name, parent, id, props);
+    function getExits(): Array<{ exit: IExit; direction: string }> {
+        const exits = [];
+        for (const dir of Object.keys(directions)) {
+            const exit: IExit | undefined = obj.props.exits[dir];
+            if (exit !== undefined) {
+                exits.push({
+                    exit,
+                    direction: dir,
+                });
+            }
+        }
+        return exits;
+    }
     obj.class = "Room";
     obj.verbs.look = async (
         caller: Option<GameObject>,
@@ -40,7 +58,22 @@ export function Room(
                 return "Look at what?";
             }
         } else {
-            return "You look around...\n" + obj.props.description;
+            const exits = getExits();
+            const dirs = exits.map((e) => e.direction);
+            const desc = exits.map((e) => {
+                return `To the ${e.direction} you see ${e.exit.to.name}.`;
+            });
+            return (
+                "You look around...\n" +
+                obj.props.description +
+                "\n" +
+                desc.join(".\n") +
+                (desc.length > 1 ? "." : "") +
+                "\n" +
+                "\nObvious exits: [" +
+                dirs.join(", ") +
+                "]"
+            );
         }
     };
     obj.verbs.examine = async (
@@ -74,9 +107,13 @@ export function Room(
     obj.verbs.move = (caller: GameObject, direction?: string): void => {
         direction = direction ? direction.toLowerCase() : undefined;
         if (direction !== undefined) {
-            const exit: GameObject | undefined = obj.props.exits[direction];
+            const exit: IExit | undefined = obj.props.exits[direction];
             if (exit !== undefined) {
-                caller.moveTo(exit, direction);
+                if (exit.door !== null && !exit.door.props.open) {
+                    caller.sendMessage(exit.door.name + " blocks you.");
+                } else {
+                    caller.moveTo(exit.to, direction);
+                }
             } else {
                 caller.sendMessage("You can't go that way.");
             }
