@@ -1,6 +1,7 @@
 import * as vm from "./modules/vm";
 import { Room } from "./classes/room";
 import { load, objects, save } from "./modules/load";
+import version from "./version";
 
 process.on("unhandledRejection", (e) => {
     console.error(e);
@@ -17,7 +18,7 @@ async function worldSave(): Promise<void> {
 }
 
 async function main() {
-    console.log("MOOts r1");
+    console.log("MOOts v" + version);
     console.log("Loading database...");
     await import("./modules/database");
     const world = await load();
@@ -30,6 +31,7 @@ async function main() {
         vm.$0.props.defaultRoom = $void;
     }
     await import("./modules/network");
+    await import("./modules/grapevine");
     worldSave();
 }
 

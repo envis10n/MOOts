@@ -2,6 +2,54 @@ import { Socket } from "@classes/socket";
 import Telnet from "ts-telnet";
 import fs from "fs";
 import tls from "tls";
+import { grapevine } from "@modules/grapevine";
+
+export const sockets: Socket[] = [];
+
+grapevine.events.channels.on("broadcast", async (payload) => {
+    if (payload.channel === "gossip") {
+        const broadcastTo = sockets.filter((socket) => {
+            if (socket.account !== null) {
+                return (
+                    socket.account.flags.find((v) => v === "GOSSIP") !== undefined
+                );
+            }
+        });
+        for (const socket of broadcastTo) {
+            socket.send(
+                `[Gossip] <${payload.game}> ${payload.name}: ${payload.message}`,
+            );
+        }
+    }
+});
+
+grapevine.events.core.on("connected", async () => {
+    for (const socket of sockets) {
+        if (socket.account !== null) {
+            socket.send("Connected to Grapevine.");
+        }
+    }
+});
+
+grapevine.events.core.on("disconnected", async () => {
+    for (const socket of sockets) {
+        if (socket.account !== null) {
+            socket.send("Disconnected from Grapevine.");
+        }
+    }
+});
+
+grapevine.events.core.on("restart", async (downtime) => {
+    for (const socket of sockets) {
+        if (socket.account !== null) {
+            socket.send(
+                "Grapevine will be restarting shortly. Expected downtime: " +
+                    downtime +
+                    " seconds.",
+            );
+        }
+    }
+});
 
 const motd = `\`..       \`..    \`....         \`....       \`..
 \`. \`..   \`...  \`..    \`..    \`..    \`..    \`..
@@ -18,9 +66,6 @@ export const wss = new WebSocket.Server({
     host: process.env.WS_HOST || "localhost",
     port: process.env.WS_PORT !== undefined ? Number(process.env.WS_PORT) : 13389,
 });
-*/
-
-/*
 
 export const clients: Map<Socket, WebSocket> = new Map();
 export const sockets: Map<GameController, Socket> = new Map();
@@ -83,6 +128,7 @@ async function telnetConnectionHandler(client: Telnet.Client): Promise<void> {
         console.log("Client:", obj.client, "v" + obj.version);
     });
     let socket: Socket | null = new Socket(client);
+    sockets.push(socket);
     client.send(motd);
     client.send(
         "Login using `login`.\nRegister a new account with `register`.",
@@ -93,6 +139,10 @@ async function telnetConnectionHandler(client: Telnet.Client): Promise<void> {
     client.on("close", () => {
         console.log("Connection lost.");
         if (socket !== null) {
+            const iSocket = sockets.findIndex((v) => v === socket);
+            if (iSocket !== -1) {
+                sockets.splice(iSocket, 1);
+            }
             if (socket.controller !== null) {
                 socket.controller.controlled.sendMessage(
                     socket.controller.controlled.name + " fades.",

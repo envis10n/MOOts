@@ -19,7 +19,8 @@
     "argon2": "^0.21.0",
     "module-alias": "^2.2.0",
     "natural": "^0.6.3",
-    "ts-telnet": "https://gitea.mudjs.net/envis10n/ts-telnet.git",
+    "ts-telnet": "^0.1.1",
+    "typevine": "^1.0.3",
     "uuid": "^3.3.2",
     "ws": "^6.2.1"
   },

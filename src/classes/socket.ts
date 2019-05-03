@@ -5,6 +5,9 @@ import Telnet from "ts-telnet";
 import * as vm from "@modules/vm";
 import * as Account from "@modules/accounts";
 import * as Character from "@modules/characters";
+import { grapevine, playerList } from "@modules/grapevine";
+import { sockets } from "@modules/network";
+import { DB } from "@/modules/database";
 
 export class Socket extends EventEmitter {
     public controller: Option<GameController> = null;
@@ -23,7 +26,13 @@ export class Socket extends EventEmitter {
                 this.controller.controlled.controller = null;
                 if (this.account !== null) {
                     this.account.online = false;
+                    const name = this.account.username;
+                    const i = playerList.findIndex((v) => v === name);
+                    if (i !== -1) {
+                        playerList.splice(i, 1);
+                    }
                     await Account.updateAccount(this.account);
+                    grapevine.signOut(name);
                 }
             }
         });
@@ -56,6 +65,8 @@ export class Socket extends EventEmitter {
                 this.account.last_login = Date.now();
                 await Account.updateAccount(this.account);
                 this.send("Authenticated.\nWelcome, " + username + ".");
+                playerList.push(this.account.username);
+                grapevine.signIn(this.account.username);
                 this.selectCharacter();
             } catch (e) {
                 this.send(e.message);
@@ -85,6 +96,8 @@ export class Socket extends EventEmitter {
                             username +
                             ".",
                     );
+                    playerList.push(this.account.username);
+                    grapevine.signIn(this.account.username);
                     this.selectCharacter();
                 } catch (e) {
                     this.send(e.message);
@@ -166,13 +179,72 @@ export class Socket extends EventEmitter {
             return cmd;
         }
     }
-    private onData(data: string) {
+    private async onData(data: string) {
         if (this.controller !== null) {
             if (data.startsWith("@")) {
                 const commandArgs = data.split(" ");
                 const command = commandArgs[0];
                 const args = commandArgs.slice(1);
                 switch (command) {
+                    case "@gossip":
+                        if (args.length === 0 || args.join(" ") === "") {
+                            this.send(
+                                "Please provide an actual message to send.",
+                            );
+                        } else {
+                            if (this.account !== null) {
+                                if (
+                                    this.account.flags.find(
+                                        (v) => v === "GOSSIP",
+                                    ) !== undefined
+                                ) {
+                                    await grapevine.broadcast(
+                                        "gossip",
+                                        this.account.username,
+                                        args.join(" "),
+                                    );
+                                    for (const socket of sockets) {
+                                        if (socket.account !== null) {
+                                            socket.send(
+                                                `[Gossip] ${
+                                                    this.account.username
+                                                }: ${args.join(" ")}`,
+                                            );
+                                        }
+                                    }
+                                } else {
+                                    const askGossip = (await this.ask(
+                                        "You do not have gossip enabled.\nWould you like to enable it? (y/N) ",
+                                    )).toLowerCase()[0];
+                                    if (askGossip === "y") {
+                                        this.account.flags.push("GOSSIP");
+                                        await Account.updateAccount(
+                                            this.account,
+                                        );
+                                        this.send("Gossip is now enabled.");
+                                    } else {
+                                        this.send("Gossip was not enabled.");
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case "@disable_gossip":
+                        if (this.account !== null) {
+                            this.account.flags = this.account.flags.filter(
+                                (v) => v !== "GOSSIP",
+                            );
+                            await Account.updateAccount(this.account);
+                            this.send("Gossip is now disabled.");
+                        }
+                        break;
+                    case "@enable_gossip":
+                        if (this.account !== null) {
+                            this.account.flags.push("GOSSIP");
+                            await Account.updateAccount(this.account);
+                            this.send("Gossip is now enabled.");
+                        }
+                        break;
                     case "@eval":
                         if (this.account !== null) {
                             if (this.account.is_wizard) {
