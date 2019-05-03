@@ -205,11 +205,17 @@ export class Socket extends EventEmitter {
                                     );
                                     for (const socket of sockets) {
                                         if (socket.account !== null) {
-                                            socket.send(
-                                                `[Gossip] ${
-                                                    this.account.username
-                                                }: ${args.join(" ")}`,
-                                            );
+                                            if (
+                                                socket.account.flags.find(
+                                                    (v) => v === "GOSSIP",
+                                                ) !== undefined
+                                            ) {
+                                                socket.send(
+                                                    `[Gossip] ${
+                                                        this.account.username
+                                                    }: ${args.join(" ")}`,
+                                                );
+                                            }
                                         }
                                     }
                                 } else {
