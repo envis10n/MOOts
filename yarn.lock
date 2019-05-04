@@ -3888,10 +3888,10 @@ typescript@^3.5.0-dev.20190430:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.0-dev.20190502.tgz#5de44f0fb4c787b2749bdcedd975497e7436e8ae"
   integrity sha512-txMRX6xDYEDIjGxEBcnhGOY9EILoKobAS+FBH3bdSsq/GQugMR1CPr6mn+daMDW5pLDV+UmhsA3PndzHp3XODg==
 
-typevine@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/typevine/-/typevine-1.0.3.tgz#1e97c4c2f6cff91d139efad0dae01c6b870efb61"
-  integrity sha512-rbvE3DC1Se2fjF0mw9uGx2QH+oFLvmQZDiORGoJ3Y5OflJ10yGqmhiQtmpdkbZUjpzbhS/lrl8zftcUIGYM9kg==
+typevine@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/typevine/-/typevine-1.1.0.tgz#4a2d6239f545783aa80074a8999c954eb4d44a82"
+  integrity sha512-T44QGXoySpGzC10tv/YePy+Hb2KFNQJ2Zr8mRoIhYgyg8SL9ROSHuwqEhljcErYc0HTE91lMVXaGXA+E6grPZA==
   dependencies:
     "@types/node" "^11.13.8"
     ee-ts "^1.0.1"
