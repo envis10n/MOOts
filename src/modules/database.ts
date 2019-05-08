@@ -1,4 +1,5 @@
 import arango, { DocumentCollection, EdgeCollection } from "arangojs";
+import log from "@modules/log";
 
 const arangoURI = process.env.ARANGO_URI || "http://localhost:8529";
 const arangoUser = process.env.ARANGO_USER || "root";
@@ -26,7 +27,7 @@ export namespace DB {
     ): Promise<DocumentCollection> {
         const col = db.collection(name);
         if (!(await col.exists())) {
-            console.log("[DB] Creating collection:", name);
+            log.debug("[DB] Creating collection:", name);
             await col.create();
         }
         return col;
@@ -36,7 +37,7 @@ export namespace DB {
     ): Promise<EdgeCollection> {
         const col = db.edgeCollection(name);
         if (!(await col.exists())) {
-            console.log("[DB] Creating edge collection:", name);
+            log.debug("[DB] Creating edge collection:", name);
             await col.create();
         }
         return col;

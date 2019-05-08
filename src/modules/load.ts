@@ -2,6 +2,7 @@ import { GameObject } from "@classes/game_object";
 import classes from "@classes/";
 import { DB } from "@modules/database";
 import { recurseObject } from "@lib/object_utils";
+import log from "@modules/log";
 
 export const objects: GameObject[] = [];
 
@@ -67,7 +68,7 @@ export async function load(): Promise<Option<GameObject>> {
         await fixRefs(rootObject);
         return rootObject;
     } catch (e) {
-        console.log("Error loading DB:", e.message);
+        log.error("Error loading DB:", e.message);
         throw e;
     }
 }

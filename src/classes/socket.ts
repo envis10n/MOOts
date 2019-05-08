@@ -7,12 +7,13 @@ import * as Account from "@modules/accounts";
 import * as Character from "@modules/characters";
 import { grapevine, playerList } from "@modules/grapevine";
 import { sockets } from "@modules/network";
-import { DB } from "@/modules/database";
+import { DB } from "@modules/database";
+import log from "@modules/log";
 
 export class Socket extends EventEmitter {
     public controller: Option<GameController> = null;
     public account: Option<IAccount> = null;
-    constructor(public socket: Telnet.Client) {
+    constructor(public socket: any) {
         super();
         this.socket.on("data", (chunk: Buffer) => {
             let d = chunk.toString().trim();
@@ -20,6 +21,12 @@ export class Socket extends EventEmitter {
                 d = d.substring(0, d.length - 1);
             }
             this.onData(d);
+        });
+        this.socket.on("message", (message: string | Buffer) => {
+            if (typeof message !== "string") {
+                message = message.toString();
+            }
+            this.onData(message);
         });
         this.socket.on("close", async () => {
             if (this.controller !== null) {
@@ -170,10 +177,8 @@ export class Socket extends EventEmitter {
         }
     }
     private async getEval(cmd: string): Promise<string> {
-        console.log(cmd);
         if (cmd.endsWith("\\")) {
             const n = await this.ask("(...)> ");
-            console.log(n);
             return this.getEval(cmd.substring(0, cmd.length - 1) + "\n" + n);
         } else {
             return cmd;
@@ -255,6 +260,7 @@ export class Socket extends EventEmitter {
                         if (this.account !== null) {
                             if (this.account.is_wizard) {
                                 this.getEval(args.join(" ")).then((code) => {
+                                    log.debug("Eval: " + code);
                                     try {
                                         this.send(vm.init()(code));
                                     } catch (e) {

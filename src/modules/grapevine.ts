@@ -1,5 +1,6 @@
 import { Typevine } from "typevine";
 import version from "../version";
+import log from "@modules/log";
 
 export const playerList: string[] = [];
 
@@ -9,7 +10,7 @@ export const grapevine = new Typevine(
 );
 
 grapevine.events.core.on("connected", () => {
-    console.log("[Grapevine] Connected.");
+    log.info("[Grapevine] Connected.");
     grapevine
         .authenticate(
             process.env.GRAPEVINE_ID || "",
@@ -19,13 +20,13 @@ grapevine.events.core.on("connected", () => {
             if (res.error) {
                 throw res.error;
             } else {
-                console.log("[Grapevine] Authenticated.");
-                console.log(res.payload);
+                log.info("[Grapevine] Authenticated.");
+                log.debug(JSON.stringify(res.payload));
                 grapevine.subscribe("gossip").then((re) => {
                     if (re.error) {
                         throw re.error;
                     } else {
-                        console.log("[Grapevine] Subscribed to gossip.");
+                        log.info("[Grapevine] Subscribed to gossip.");
                     }
                 });
             }
@@ -33,7 +34,7 @@ grapevine.events.core.on("connected", () => {
 });
 
 grapevine.events.core.on("disconnected", () => {
-    console.log("[Grapevine] Disconnected.");
+    log.info("[Grapevine] Disconnected.");
 });
 
 grapevine.events.core.on("heartbeat", () => {
@@ -41,10 +42,10 @@ grapevine.events.core.on("heartbeat", () => {
 });
 
 grapevine.events.core.on("restart", (downtime) => {
-    console.log("[Grapevine] Restart imminent...", downtime, "second(s).");
+    log.info("[Grapevine] Restart imminent...", downtime, "second(s).");
 });
 
 grapevine.events.channels.on("broadcast", (broadcast) => {
-    console.log("[Grapevine] Broadcast");
-    console.log(broadcast);
+    log.debug("[Grapevine] Broadcast");
+    log.debug(JSON.stringify(broadcast));
 });

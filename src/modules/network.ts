@@ -1,8 +1,9 @@
 import { Socket } from "@classes/socket";
 import Telnet from "ts-telnet";
 import fs from "fs";
-import tls from "tls";
 import { grapevine } from "@modules/grapevine";
+import { WServer, WClient } from "@modules/websocket";
+import log from "@modules/log";
 
 export const sockets: Socket[] = [];
 
@@ -11,7 +12,8 @@ grapevine.events.channels.on("broadcast", async (payload) => {
         const broadcastTo = sockets.filter((socket) => {
             if (socket.account !== null) {
                 return (
-                    socket.account.flags.find((v) => v === "GOSSIP") !== undefined
+                    socket.account.flags.find((v) => v === "GOSSIP") !==
+                    undefined
                 );
             }
         });
@@ -61,71 +63,24 @@ const motd = `\`..       \`..    \`....         \`....       \`..
 
 Welcome to MOOts`;
 
-/*
-export const wss = new WebSocket.Server({
-    host: process.env.WS_HOST || "localhost",
-    port: process.env.WS_PORT !== undefined ? Number(process.env.WS_PORT) : 13389,
+const wsPort =
+    process.env.WS_PORT !== undefined ? Number(process.env.WS_PORT) : 5557;
+const wsHost = process.env.WS_HOST;
+
+const ws = new WServer(wsPort, wsHost);
+
+ws.on("listening", () => {
+    log.info("WebSocket server online.");
 });
 
-export const clients: Map<Socket, WebSocket> = new Map();
-export const sockets: Map<GameController, Socket> = new Map();
+ws.on("connection", telnetConnectionHandler);
 
-wss.on("connection", async (ws) => {
-    console.log("Connection established from websocket.");
-    let socket: Socket | null = new Socket(ws);
-    const $defaultRoom: GameObject = vm.$0.props.defaultRoom || vm.$0;
-    let plrObj: GameObject | null;
-    const f = await vm.$0.findObject(`Player${plrNum}`);
-    if (f !== null && f.name === `Player${plrNum}`) {
-        plrObj = f;
-    } else {
-        plrObj = $defaultRoom.createChild(Creature, `Player${plrNum}`);
-        plrObj.moveTo($defaultRoom);
-    }
-    plrNum++;
-    plrObj.sendMessage(plrObj.name + " appears.", plrObj, plrObj.location);
-    let controller: GameController | null = new GameController(plrObj, socket);
-    plrObj.sendMessage(motd);
-    clients.set(socket, ws);
-    sockets.set(controller, socket);
-    ws.on("close", () => {
-        console.log("Connection lost.");
-        if (plrObj !== null && controller !== null && socket !== null) {
-            if (plrObj.parent !== null) {
-                plrObj.parent.removeChild(plrObj);
-            }
-            sockets.delete(controller);
-            clients.delete(socket);
-            controller.controlled.sendMessage(controller.controlled.name + " fades.",
-                controller.controlled, controller.controlled.location);
-            controller.controlled.controller = null;
-            socket = null;
-            plrObj = null;
-            controller = null;
-        }
-    });
-    ws.on("pong", () => {
-        setTimeout(() => {
-            if (ws.readyState !== 1) {
-                console.log("Broken socket?\n", ws);
-            } else {
-                ws.ping();
-            }
-        }, 25000);
-    });
-    ws.ping();
-});
-
-wss.on("listening", () => {
-    console.log("WebSocket server online.");
-});
-
-*/
-
-async function telnetConnectionHandler(client: Telnet.Client): Promise<void> {
-    console.log("Connection established.");
+async function telnetConnectionHandler(
+    client: Telnet.Client | WClient,
+): Promise<void> {
+    log.debug("Connection established.");
     client.on("Core.Hello", (obj) => {
-        console.log("Client:", obj.client, "v" + obj.version);
+        log.debug("Client:", obj.client, "v" + obj.version);
     });
     let socket: Socket | null = new Socket(client);
     sockets.push(socket);
@@ -134,10 +89,10 @@ async function telnetConnectionHandler(client: Telnet.Client): Promise<void> {
         "Login using `login`.\nRegister a new account with `register`.",
     );
     client.on("error", (err: Error) => {
-        console.log("Client error:", err.message);
+        log.error("Client error:", err.message);
     });
     client.on("close", () => {
-        console.log("Connection lost.");
+        log.debug("Connection lost.");
         if (socket !== null) {
             const iSocket = sockets.findIndex((v) => v === socket);
             if (iSocket !== -1) {
@@ -166,7 +121,7 @@ try {
             ? Boolean(process.env.TELNET_SECURE)
             : false;
     const tserv = new Telnet.Server(telnetHost, telnetPort);
-    console.log("Telnet server online.");
+    log.info("Telnet server online.");
     tserv.on("connection", telnetConnectionHandler);
     if (telnetSecure) {
         const sHostname = process.env.TELNET_SECURE_HOSTNAME || "";
@@ -183,7 +138,7 @@ try {
             },
             hostname: sHostname,
         });
-        console.log("Telnet secure server online.");
+        log.info("Telnet secure server online.");
         tservSecure.on("connection", telnetConnectionHandler);
     }
 } catch (e) {
