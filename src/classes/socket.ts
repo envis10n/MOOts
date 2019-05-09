@@ -39,7 +39,9 @@ export class Socket extends EventEmitter {
                         playerList.splice(i, 1);
                     }
                     await Account.updateAccount(this.account);
-                    grapevine.signOut(name);
+                    if (grapevine !== null) {
+                        grapevine.signOut(name);
+                    }
                 }
             }
         });
@@ -73,7 +75,9 @@ export class Socket extends EventEmitter {
                 await Account.updateAccount(this.account);
                 this.send("Authenticated.\nWelcome, " + username + ".");
                 playerList.push(this.account.username);
-                grapevine.signIn(this.account.username);
+                if (grapevine !== null) {
+                    grapevine.signIn(this.account.username);
+                }
                 this.selectCharacter();
             } catch (e) {
                 this.send(e.message);
@@ -104,7 +108,9 @@ export class Socket extends EventEmitter {
                             ".",
                     );
                     playerList.push(this.account.username);
-                    grapevine.signIn(this.account.username);
+                    if (grapevine !== null) {
+                        grapevine.signIn(this.account.username);
+                    }
                     this.selectCharacter();
                 } catch (e) {
                     this.send(e.message);
@@ -203,11 +209,13 @@ export class Socket extends EventEmitter {
                                         (v) => v === "GOSSIP",
                                     ) !== undefined
                                 ) {
-                                    await grapevine.broadcast(
-                                        "gossip",
-                                        this.account.username,
-                                        args.join(" "),
-                                    );
+                                    if (grapevine !== null) {
+                                        await grapevine.broadcast(
+                                            "gossip",
+                                            this.account.username,
+                                            args.join(" "),
+                                        );
+                                    }
                                     for (const socket of sockets) {
                                         if (socket.account !== null) {
                                             if (

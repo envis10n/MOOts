@@ -1,6 +1,7 @@
 import Classes from "../classes";
 import { GameObject } from "../classes/game_object";
 import vm from "vm";
+import { DB } from "@modules/database";
 
 const global = Object.assign(
     {

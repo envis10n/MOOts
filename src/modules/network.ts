@@ -7,51 +7,55 @@ import log from "@modules/log";
 
 export const sockets: Socket[] = [];
 
-grapevine.events.channels.on("broadcast", async (payload) => {
-    if (payload.channel === "gossip") {
-        const broadcastTo = sockets.filter((socket) => {
-            if (socket.account !== null) {
-                return (
-                    socket.account.flags.find((v) => v === "GOSSIP") !==
-                    undefined
+if (grapevine !== null) {
+    grapevine.events.channels.on("broadcast", async (payload) => {
+        if (payload.channel === "gossip") {
+            const broadcastTo = sockets.filter((socket) => {
+                if (socket.account !== null) {
+                    return (
+                        socket.account.flags.find((v) => v === "GOSSIP") !==
+                        undefined
+                    );
+                }
+            });
+            for (const socket of broadcastTo) {
+                socket.send(
+                    `[Gossip] <${payload.game}> ${payload.name}: ${
+                        payload.message
+                    }`,
                 );
             }
-        });
-        for (const socket of broadcastTo) {
-            socket.send(
-                `[Gossip] <${payload.game}> ${payload.name}: ${payload.message}`,
-            );
         }
-    }
-});
+    });
 
-grapevine.events.core.on("connected", async () => {
-    for (const socket of sockets) {
-        if (socket.account !== null) {
-            socket.send("Connected to Grapevine.");
+    grapevine.events.core.on("connected", async () => {
+        for (const socket of sockets) {
+            if (socket.account !== null) {
+                socket.send("Connected to Grapevine.");
+            }
         }
-    }
-});
+    });
 
-grapevine.events.core.on("disconnected", async () => {
-    for (const socket of sockets) {
-        if (socket.account !== null) {
-            socket.send("Disconnected from Grapevine.");
+    grapevine.events.core.on("disconnected", async () => {
+        for (const socket of sockets) {
+            if (socket.account !== null) {
+                socket.send("Disconnected from Grapevine.");
+            }
         }
-    }
-});
+    });
 
-grapevine.events.core.on("restart", async (downtime) => {
-    for (const socket of sockets) {
-        if (socket.account !== null) {
-            socket.send(
-                "Grapevine will be restarting shortly. Expected downtime: " +
-                    downtime +
-                    " seconds.",
-            );
+    grapevine.events.core.on("restart", async (downtime) => {
+        for (const socket of sockets) {
+            if (socket.account !== null) {
+                socket.send(
+                    "Grapevine will be restarting shortly. Expected downtime: " +
+                        downtime +
+                        " seconds.",
+                );
+            }
         }
-    }
-});
+    });
+}
 
 const motd = `\`..       \`..    \`....         \`....       \`..
 \`. \`..   \`...  \`..    \`..    \`..    \`..    \`..
