@@ -1,6 +1,6 @@
 import * as vm from "./modules/vm";
 import { Room } from "./classes/room";
-import { load, objects, save } from "./modules/load";
+import { load, save } from "./modules/load";
 import version from "./version";
 import log from "@modules/log";
 
@@ -24,15 +24,16 @@ async function main() {
     await import("./modules/database");
     const world = await load();
     if (world !== null) {
-        vm.init(world);
+        await vm.init(world);
     } else {
         log.info("Seeding db...");
-        vm.init();
+        await vm.init();
         const $void = vm.$0.createChild(Room, "Void");
         vm.$0.props.defaultRoom = $void;
     }
     await import("./modules/network");
     await import("./modules/grapevine");
+    await import("./modules/web");
     worldSave();
 }
 

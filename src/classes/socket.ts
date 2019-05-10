@@ -269,11 +269,14 @@ export class Socket extends EventEmitter {
                             if (this.account.is_wizard) {
                                 this.getEval(args.join(" ")).then((code) => {
                                     log.debug("Eval: " + code);
-                                    try {
-                                        this.send(vm.init()(code));
-                                    } catch (e) {
-                                        this.send(e.message);
-                                    }
+
+                                    vm.init().then((ev) => {
+                                        try {
+                                            this.send(ev(code));
+                                        } catch (e) {
+                                            this.send(e.message);
+                                        }
+                                    });
                                 });
                             } else {
                                 this.emit("data", data);

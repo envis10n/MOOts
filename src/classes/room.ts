@@ -59,7 +59,6 @@ export function Room(
             }
         } else {
             const exits = getExits();
-            const dirs = exits.map((e) => e.direction);
             const desc = exits.map((e) => {
                 return `To the ${e.direction} you see ${e.exit.to.name}.`;
             });
@@ -68,11 +67,7 @@ export function Room(
                 obj.props.description +
                 "\n" +
                 desc.join(".\n") +
-                (desc.length > 1 ? "." : "") +
-                "\n" +
-                "\nObvious exits: [" +
-                dirs.join(", ") +
-                "]"
+                (desc.length > 1 ? "." : "")
             );
         }
     };

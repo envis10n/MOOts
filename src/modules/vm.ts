@@ -1,7 +1,8 @@
-import Classes from "../classes";
-import { GameObject } from "../classes/game_object";
+import Classes from "@classes/";
+import { GameObject } from "@classes/game_object";
 import vm from "vm";
-import { DB } from "@modules/database";
+import { getScripts } from "@modules/scripts";
+import log from "@modules/log";
 
 const global = Object.assign(
     {
@@ -27,15 +28,41 @@ const bootstrap = `((root) => {
 
 export const sandbox = vm.createContext(global);
 export let $0: GameObject;
-export function init(root?: GameObject): (code: string) => any {
+export async function init(root?: GameObject): Promise<(code: string) => any> {
     if ($0 === undefined) {
         const boot = vm.runInContext(bootstrap, sandbox);
+        const scripts = await getScripts();
+        const scriptLoader: (
+            code: string,
+            global: IObjectAny,
+        ) => void = vm.runInContext(
+            `(function(code, global){ eval(code); })`,
+            sandbox,
+        );
+        for (const script of scripts) {
+            log.debug(
+                "Loading script: " + script.name + " by " + script.author,
+            );
+            try {
+                scriptLoader(script.code, global);
+            } catch (e) {
+                log.error("Error loading script: " + e.message);
+            }
+        }
         $0 = boot(root);
     }
     return (code) => {
-        return vm.runInContext(code, sandbox);
+        const scriptLoader: (
+            code: string,
+            global: IObjectAny,
+        ) => void = vm.runInContext(
+            `(function(code, global){ return eval(code); })`,
+            sandbox,
+        );
+        return scriptLoader(code, global);
     };
 }
+
 export function getEval(): (caller: GameObject, code: string) => any {
     return (caller, code) => {
         const c = vm.runInContext(
