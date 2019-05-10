@@ -1,6 +1,7 @@
 import winston, { format, transports } from "winston";
 import Transport from "winston-transport";
 import { DB } from "@modules/database";
+import bool from "@lib/bool";
 
 class ArangoTransport extends Transport {
     private collection: string;
@@ -23,8 +24,7 @@ class ArangoTransport extends Transport {
 
 const level = process.env.LOG_LEVEL || "debug";
 
-const logDB =
-    process.env.LOG_DB !== undefined ? Boolean(process.env.LOG_DB) : false;
+const logDB = bool(process.env.LOG_DB);
 
 const logger = winston.createLogger({
     level,

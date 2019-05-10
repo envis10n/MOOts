@@ -1,49 +1,50 @@
 {
-  "devDependencies": {
-    "@types/express": "^4.16.1",
-    "@types/jest": "^24.0.11",
-    "@types/natural": "^0.6.0",
-    "@types/uuid": "^3.4.4",
-    "@types/ws": "^6.0.1",
-    "dotenv": "^7.0.0",
-    "jest": "^24.7.1",
-    "prettier": "1.17.0",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.16.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.5.0-dev.20190424"
-  },
-  "dependencies": {
-    "@types/node": "^11.13.7",
-    "arangojs": "^6.10.0",
-    "argon2": "^0.21.0",
-    "express": "^4.16.4",
-    "module-alias": "^2.2.0",
-    "natural": "^0.6.3",
-    "ts-telnet": "^0.1.1",
-    "typevine": "^1.1.0",
-    "uuid": "^3.3.2",
-    "winston": "^3.2.1",
-    "winston-transport": "^4.3.0",
-    "ws": "^6.2.1"
-  },
-  "name": "moots",
-  "version": "0.0.1",
-  "description": "MOO server in TypeScript.",
-  "main": "dist/main.js",
-  "scripts": {
-    "serve": "node -r dotenv/config -r module-alias/register .",
-    "build": "tsc",
-    "start": "tsc && node -r dotenv/config -r module-alias/register ."
-  },
-  "repository": "https://gitea.mudjs.net/envis10n/MOOts.git",
-  "author": "envis10n",
-  "license": "MIT",
-  "_moduleAliases": {
-    "@": "./dist",
-    "@lib": "./dist/lib",
-    "@modules": "./dist/modules",
-    "@classes": "./dist/classes"
-  }
+    "devDependencies": {
+        "@types/express": "^4.16.1",
+        "@types/jest": "^24.0.11",
+        "@types/natural": "^0.6.0",
+        "@types/uuid": "^3.4.4",
+        "@types/ws": "^6.0.1",
+        "dotenv": "^7.0.0",
+        "jest": "^24.7.1",
+        "prettier": "1.17.0",
+        "ts-jest": "^24.0.2",
+        "tslint": "^5.16.0",
+        "tslint-config-prettier": "^1.18.0",
+        "tslint-plugin-prettier": "^2.0.1",
+        "typescript": "^3.5.0-dev.20190424"
+    },
+    "dependencies": {
+        "@types/node": "^11.13.7",
+        "arangojs": "^6.10.0",
+        "argon2": "^0.21.0",
+        "express": "^4.16.4",
+        "module-alias": "^2.2.0",
+        "natural": "^0.6.3",
+        "ts-telnet": "^0.1.1",
+        "typevine": "^1.1.0",
+        "uuid": "^3.3.2",
+        "winston": "^3.2.1",
+        "winston-transport": "^4.3.0",
+        "ws": "^6.2.1"
+    },
+    "name": "moots",
+    "version": "0.0.1",
+    "description": "MOO server in TypeScript.",
+    "main": "dist/main.js",
+    "scripts": {
+        "serve": "node -r dotenv/config -r module-alias/register .",
+        "build": "tsc",
+        "start": "tsc && node -r dotenv/config -r module-alias/register .",
+        "debug": "node -r dotenv/config -r module-alias/register --inspect-brk ."
+    },
+    "repository": "https://gitea.mudjs.net/envis10n/MOOts.git",
+    "author": "envis10n",
+    "license": "MIT",
+    "_moduleAliases": {
+        "@": "./dist",
+        "@lib": "./dist/lib",
+        "@modules": "./dist/modules",
+        "@classes": "./dist/classes"
+    }
 }

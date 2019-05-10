@@ -1,13 +1,14 @@
 import { Typevine } from "typevine";
 import version from "../version";
 import log from "@modules/log";
+import bool from "@lib/bool";
 
 const grapevineID = process.env.GRAPEVINE_ID || "";
 const grapevineSecret = process.env.GRAPEVINE_SECRET || "";
 const grapeEnabled =
     process.env.GRAPEVINE_ENABLED !== undefined
         ? grapevineID !== "" && grapevineSecret !== ""
-            ? Boolean(process.env.GRAPEVINE_ENABLED)
+            ? bool(process.env.GRAPEVINE_ENABLED)
             : false
         : false;
 
