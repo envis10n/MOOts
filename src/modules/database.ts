@@ -27,7 +27,7 @@ export namespace DB {
     ): Promise<DocumentCollection> {
         const col = db.collection(name);
         if (!(await col.exists())) {
-            log.debug("[DB] Creating collection:", name);
+            log.debug("[DB] Creating collection: " + name);
             await col.create();
         }
         return col;
@@ -37,7 +37,7 @@ export namespace DB {
     ): Promise<EdgeCollection> {
         const col = db.edgeCollection(name);
         if (!(await col.exists())) {
-            log.debug("[DB] Creating edge collection:", name);
+            log.debug("[DB] Creating edge collection: " + name);
             await col.create();
         }
         return col;

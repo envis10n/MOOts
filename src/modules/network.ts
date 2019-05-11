@@ -84,7 +84,7 @@ async function telnetConnectionHandler(
 ): Promise<void> {
     log.debug("Connection established.");
     client.on("Core.Hello", (obj) => {
-        log.debug("Client:", obj.client, "v" + obj.version);
+        log.debug("Client: " + obj.client + " v" + obj.version);
     });
     let socket: Socket | null = new Socket(client);
     sockets.push(socket);
