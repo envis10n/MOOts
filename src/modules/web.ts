@@ -1,5 +1,6 @@
 import express from "express";
 import log from "./log";
+import path from "path";
 
 type ErrorCB = (error: Error | null | undefined) => void;
 type Write1 = (chunk: any, cb?: ErrorCB) => boolean;
@@ -35,6 +36,12 @@ v1.get("/test", (req, res) => {
 api.use("/v1", v1);
 
 app.use("/api", api);
+
+app.get("/play", (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), "public", "client", "index.html"));
+});
+
+app.use("/play", express.static(path.join(process.cwd(), "public", "client")));
 
 app.listen(webPort, () => {
     log.info("HTTP server online.");
