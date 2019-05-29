@@ -65,8 +65,7 @@ export function Room(
             return (
                 "You look around...\n" +
                 obj.props.description +
-                "\n" +
-                desc.join(".\n") +
+                (desc.length > 0 ? "\n" + desc.join(".\n") : "") +
                 (desc.length > 1 ? "." : "")
             );
         }

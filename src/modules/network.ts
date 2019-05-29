@@ -57,15 +57,18 @@ if (grapevine !== null) {
     });
 }
 
-const motd = `\`..       \`..    \`....         \`....       \`..
+const motd =
+    `\x1b[36;1m\`..       \`..    \`....         \`....       \`..
 \`. \`..   \`...  \`..    \`..    \`..    \`..    \`..
 \`.. \`.. \` \`..\`..        \`..\`..        \`..\`.\`. \`. \`....
 \`..  \`..  \`..\`..        \`..\`..        \`..  \`..  \`..
 \`..   \`.  \`..\`..        \`..\`..        \`..  \`..    \`...
 \`..       \`..  \`..     \`..   \`..     \`..   \`..      \`..
 \`..       \`..    \`....         \`....        \`.. \`.. \`..
-
-Welcome to MOOts`;
+\x1b[0m` +
+    `
+\x1b[4m\x1b[32mWelcome to MOOts` +
+    "\x1b[0m";
 
 const wsPort =
     process.env.WS_PORT !== undefined ? Number(process.env.WS_PORT) : 5557;
@@ -90,7 +93,7 @@ async function telnetConnectionHandler(
     sockets.push(socket);
     client.send(motd);
     client.send(
-        "Login using `login`.\nRegister a new account with `register`.",
+        "Login using \x1b[35;1mlogin\x1b[0m.\nRegister a new account with \x1b[35mregister\x1b[0m.",
     );
     client.on("error", (err: Error) => {
         log.error("Client error:", err.message);

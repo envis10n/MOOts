@@ -37,11 +37,15 @@ api.use("/v1", v1);
 
 app.use("/api", api);
 
+/* Web Client */
+
 app.get("/play", (req, res) => {
     res.sendFile(path.resolve(process.cwd(), "public", "client", "index.html"));
 });
 
 app.use("/play", express.static(path.join(process.cwd(), "public", "client")));
+
+/* */
 
 app.listen(webPort, () => {
     log.info("HTTP server online.");
